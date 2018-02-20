@@ -8,46 +8,46 @@ for easy building cache entries.
 ``` c#
 public class Startup
 {
-	public void ConfigureServices(IServiceCollection services)
+    public void ConfigureServices(IServiceCollection services)
     {
-		...
+        ...
 
-		services.AddMemoryCache();
-	}
+        services.AddMemoryCache();
+    }
 }
 ```
 
 ## Creating Entries
 
 ``` c#
-	public class Repository<TEntity>
-        where TEntity : class, new()
+public class Repository<TEntity>
+    where TEntity : class, new()
+{
+    pulic CacheBuilder CacheBuilder { get; private set; }
+
+    public Repository(CacheBuilder cacheBuilder)
     {
-        public CacheBuilder CacheBuilder { get; private set; }
+	// Ask for a cacheBuilder instance to be injected
+        CacheBuilder = cacheBuilder;
+    }
 
-        public Repository(CacheBuilder cacheBuilder)
-        {
-			// Ask for a cacheBuilder instance to be injected
-            CacheBuilder = cacheBuilder;
-        }
+    public async Task<TEntity> FindByKeyFromCacheAsync(object key)
+    {
+        return await CacheBuilder
+	    .ForObjectOfType<TEntity>()
+	    .WithKey(key.ToString())
+            .ExpiresWithin(TimeSpan.FromMinutes(5))
+            .BuildValueFromAsync(async () =>
+            {
+                return await FindByKeyAsync(key);
+            })
+            .GetFromCacheAsync();
+    }
 
-		public async Task<TEntity> FindByKeyFromCacheAsync(object key)
-        {
-            return await CacheBuilder
-				.ForObjectOfType<TEntity>()
-				.WithKey(key.ToString())
-                .ExpiresWithin(TimeSpan.FromMinutes(5))
-                .BuildValueFromAsync(async () =>
-                {
-                    return await FindByKeyAsync(key);
-                })
-                .GetFromCacheAsync();
-        }
+    public async Task<TEntity> FindByKeyAsync(object key)
+    {
+	...
+    }
 
-		public async Task<TEntity> FindByKeyAsync(object key)
-		{
-			...
-		}
-
-	}
+}
 ```
