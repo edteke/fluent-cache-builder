@@ -1,10 +1,9 @@
 ﻿using InteractionsIQ.Commons.Cache;
-using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace Microsoft.Extensions.Configuration
+namespace Microsoft.Extensions.DependencyInjection
 {
     public static class ConfigurationExtensions
     {
